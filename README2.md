@@ -17,7 +17,7 @@ Then create another table called "users" with the following columns and types:
     - id: text.
     - name: text.
     - username: text.
-
+    - isAdmin: text.
 
 - With the worker selected, go to bindings. Click add, click D1 database, choose the variable name "db" and select your database by the name you set previously. Then deploy it.
 
