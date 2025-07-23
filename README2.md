@@ -12,6 +12,7 @@
     - category: text.
     - nutritionFacts: text.
     - alreadyTaken: text.
+    - meal: text.
 
 Then create another table called "users" with the following columns and types:
     - id: text.
