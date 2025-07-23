@@ -3,7 +3,8 @@ Actually this bot does not work correctly, due to an uncomprensible error. When 
 ```js
 const { result } = await env.db.prepare("SELECT * FROM users WHERE id = ?").bind(chatId).all();
 ```
-Can you understand the cause of that issue? Feel free to contibute, your contribute will be mentioned.
+Can you understand the cause of that issue? Feel free to contibute, your contribute will be mentioned. 
+The database contains data, when I run the same query from the console I obtain the correct result.
 
 # Keto receips Telegram bot [![Awesome](https://cdn.jsdelivr.net/gh/sindresorhus/awesome@d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/Mqtth3w/keto-receips-Telegram-bot)
 
