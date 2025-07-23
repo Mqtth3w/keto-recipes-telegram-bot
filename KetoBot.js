@@ -11,7 +11,7 @@ export default {
   async scheduled(controller, env, ctx) {
       //console.log("cron processed");
 
-      const { users } = await env.db.prepare(
+      let { users } = await env.db.prepare(
         "SELECT id FROM users"
         ).all();
 
@@ -68,29 +68,26 @@ export default {
 				const text = payload.message.text || "";
 				const command = text.split(" ")[0];
 				//const args = text.substring(command.length).trim();
-				
-        if (command === "/start") {
-          await sendMessage(env, chatId, "msg");
-          const { result } = await env.db.prepare(
-            "SELECT * FROM users WHERE id = ?"
-            ).bind(chatId).all();
-            await sendMessage(env, chatId, "msg2");
-          if (result.length > 0) {
-            await sendMessage(env, chatId, "msg3");
-            let msg = `Welcome back ${name}!`;
-            await sendMessage(env, chatId, msg);
-          } else {
-            await sendMessage(env, chatId, "msg4");
-            await env.db.prepare(
-              "INSERT INTO users (?, ?, ?)"
-              ).bind(chatId, name, username).all();
-            
-            let msg = `Hi ${name}, welcome to the KetoBot!`;
-            await sendMessage(env, chatId, msg);
-          }
-        } else {
-          await sendMessage(env, chatId, "Work in progress...");
-        }
+				try {
+          if (command === "/start") {
+            await sendMessage(env, chatId, "msg");
+            const { result } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
+              .bind(chatId).all();
+            await sendMessage(env, chatId, `result: ${result}`);
+            if (result.lenght > 0) {
+              await sendMessage(env, chatId, "msg3");
+              let msg = `Welcome back ${name}!`;
+              await sendMessage(env, chatId, msg);
+            } else {
+              await sendMessage(env, chatId, "msg4");
+              await env.db.prepare("INSERT INTO users (?, ?, ?)")
+              .bind(chatId, name, username).run();
+               
+              let msg = `Hi ${name}, welcome to the KetoBot!`;
+              await sendMessage(env, chatId, msg);
+            }
+          } else if (text) await searchDishes(env, chatId, "/searchname", text);
+        } catch (err) { await sendMessage(env, chatId, `error: ${err}`);}
       }
     }
     return new Response("OK", { status: 200 });
@@ -100,22 +97,18 @@ export default {
 
 async function getDish(env, field, fieldVal) {
   let { result } = await env.db.prepare(
-    `SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`
-    ).bind(fieldVal).all();
+    `SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+    .bind(fieldVal).all();
   if (result.lenght > 0) {
-    await env.db.prepare(
-      "UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?"
-      ).bind(result[0].rowid).all();
+    await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
+      .bind(result[0].rowid).run();
   } else {
-    await env.db.prepare(
-      `UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`
-      ).bind(fieldVal).all();
-    result = await env.db.prepare(
-      `SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`
-      ).bind(fieldVal).all();
-    await env.db.prepare(
-      "UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?"
-      ).bind(result[0].rowid).all();
+    await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
+      .bind(fieldVal).run();
+    result = await env.db.prepare(`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+      .bind(fieldVal).all();
+    await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
+    .bind(result[0].rowid).all();
   }
   return result;
 }
@@ -125,7 +118,7 @@ async function getDishByMeal(env, meal) {
   let result;
   if (meal === "breakfast") {
     result = await getDish(env, "meal", meal);
-  } else if (meal === "lunch" || meal === "dinner") {
+  } else {
     result = await getDish(env, "type", "first");
     result.append(await getDish(env, "type", "second"));
     result.append(await getDish(env, "type", "side"));
@@ -163,5 +156,47 @@ async function sendBroadcastMessage(env, msg, users) {
   for (const userId of users) {
     await sendMessage(env, userId, msg);
     await new Promise(resolve => setTimeout(resolve, 33)); // Avoid hitting rate limits (30 messages/second      
+  }
+};
+
+/** 
+ * Search for all receips that match a specified field.
+ * 
+ * @param {object} env - The environment object containing runtime information, such as bindings.
+ * @param {number|string} chatId - The chat ID of the user who requested the service.
+ * @param {string} command - The command that indicates the filed for search.
+ * @param {string} data - The data to be searched.
+ * @returns {Promise<void>} This function does not return a value.
+ */
+async function searchDishes(env, chatId, command, data) {
+	const fieldMap = {
+			"/searchname": "name"
+		};
+    const { results } = await env.db.prepare(`SELECT * FROM dishes WHERE ${fieldMap[command]} LIKE ?`)
+								.bind(`%${data}%`).all();
+    if (results.length === 0) return await sendMessage(env, chatId, `No data`);
+    let total = 0;
+	let message = "";
+	const batchSize = 25;
+	for (let i = 0; i < results.length; i++) {
+		const dish = results[i];
+		total++;
+		message += `Dish name: ${dish.name}\n` +
+			`Cooking time: ${dish.time}\n` +
+			`Nutrition facts: ${dish.nutritionFacts}\n` +
+			`Ingredients: ${dish.ingredients}\n` +
+			`Recipe: ${dish.receipe}\n` +
+			`Type: ${dish.type}\n` +
+      `Category: ${dish.category}\n` +
+      `Already taken: ${dish.alreadyTaken}\n` +
+			`Meal: ${dish.meal}\n\n`;
+		if ((total % batchSize === 0) || (i === results.length - 1)) {
+			if (i === results.length - 1) {
+				message += `Total dishes matched: ${total}`;
+			}
+			await sendMessage(env, chatId, message);
+			await new Promise(resolve => setTimeout(resolve, 31));
+			message = ""; 
+		}
   }
 };
