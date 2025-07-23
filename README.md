@@ -1,6 +1,6 @@
 # Keto Receips Telegram bot [![Awesome](https://cdn.jsdelivr.net/gh/sindresorhus/awesome@d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/Mqtth3w/keto-receips-Telegram-bot)
 
-A Telegram bot to receive ketogenic receps for breakfast, lunch and dinner every day.
+A Telegram bot to receive ketogenic receips for breakfast, lunch and dinner every day.
 
 ## How to deploy the bot completely free ([Cloudflare](https://www.cloudflare.com/) based)
 It can handle 100k requests for free per day (Cloudflare limits).
