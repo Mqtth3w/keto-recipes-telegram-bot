@@ -16,7 +16,7 @@ It can handle 100k requests for free per day (Cloudflare limits).
 - Click edit so replace the code with the content of [KetoBot.js](./KetoBot.js). Deploy it.
 - Click configure worker, go to setting, go to variables.
 - Add the variable API_KEY (secret type). Which is the bot api token.
-- Add the variable SECRET_TOKEN (secret type). Generate its value through the script [gen_token.py](./gen_token.py). You can also type it with your hands (1-256 characters. Only characters `A-Z`, `a-z`, `0-9`, `_` and `-` are allowed). Save it for future use..
+- Add the variable SECRET_TOKEN (secret type). Generate its value through the script [gen_token.py](https://github.com/Mqtth3w/library-Telegram-bot/blob/main/gen_token.py). You can also type it with your hands (1-256 characters. Only characters `A-Z`, `a-z`, `0-9`, `_` and `-` are allowed). Save it for future use..
 - Encrypt (set the secrect type!) all variables and save.
 - Go to "Trigger Events" in the worker settings then add a new event "Cron Triggers" with this cron expression `0 5 * * 1-7`. It means every day at 5 am, feel free to chnage the 5. Then add it.
 
