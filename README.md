@@ -55,7 +55,7 @@ It can handle 100k requests for free per day (Cloudflare limits).
 
 
 # 🛠️ To do 
-- More commands
+- Search dishes by their properties (e.g., nutrition facts, receips, meal, etc)
 
 # 💭 Discussion 
 For any comment or to request a new feature you can either use the [Discussions](https://github.com/Mqtth3w/keto-receips-telegram-bot/discussions) section or contact me through this [bot](https://t.me/Mqtth3w_support_bot).
