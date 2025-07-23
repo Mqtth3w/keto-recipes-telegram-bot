@@ -1,8 +1,7 @@
 # Hi there
-Actually this bot does not work correctly, due to an uncomprensible error. When I do a SQL quesry to the D1 Database, the result is undefined while everything is correct. Here the code (lines 71,72 also 14:
+Actually this bot does not work correctly, due to an uncomprensible error. When I do a SQL quesry to the D1 Database, the result is undefined while everything is correct. Here the code (lines 71,72 also 14):
 ```js
-const { result } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
-              .bind(chatId).all();
+const { result } = await env.db.prepare("SELECT * FROM users WHERE id = ?").bind(chatId).all();
 ```
 Can you understand the cause of that issue? Feel free to contibute, your contribute will be mentioned.
 
