@@ -1,3 +1,11 @@
+# Hi there
+Actually this bot does not work correctly, due to an uncomprensible error. When I do a SQL quesry to the D1 Database, the result is undefined while everything is correct. Here the code (lines 71,72 also 14:
+```js
+const { result } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
+              .bind(chatId).all();
+```
+Can you understand the cause of that issue? Feel free to contibute, your contribute will be mentioned.
+
 # Keto receips Telegram bot [![Awesome](https://cdn.jsdelivr.net/gh/sindresorhus/awesome@d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/Mqtth3w/keto-receips-Telegram-bot)
 
 A Telegram bot to receive ketogenic receips for breakfast, lunch and dinner every day.
