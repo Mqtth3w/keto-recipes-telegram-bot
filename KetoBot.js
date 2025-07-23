@@ -11,9 +11,7 @@ export default {
   async scheduled(controller, env, ctx) {
       //console.log("cron processed");
 
-      let { users } = await env.db.prepare(
-        "SELECT id FROM users"
-        ).all();
+      const { users } = await env.db.prepare("SELECT id FROM users").all();
 
       if (users.lenght > 0) {
         let breafast = await getDishByMeal(env, "breakfast");
@@ -70,21 +68,15 @@ export default {
 				//const args = text.substring(command.length).trim();
 				try {
           if (command === "/start") {
-            await sendMessage(env, chatId, "msg");
             const { result } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
               .bind(chatId).all();
             await sendMessage(env, chatId, `result: ${result}`);
             if (result.lenght > 0) {
-              await sendMessage(env, chatId, "msg3");
-              let msg = `Welcome back ${name}!`;
-              await sendMessage(env, chatId, msg);
+              await sendMessage(env, chatId, `Welcome back ${name}!`);
             } else {
-              await sendMessage(env, chatId, "msg4");
-              await env.db.prepare("INSERT INTO users (?, ?, ?)")
+              await env.db.prepare("INSERT INTO users VALUES (?, ?, ?)")
               .bind(chatId, name, username).run();
-               
-              let msg = `Hi ${name}, welcome to the KetoBot!`;
-              await sendMessage(env, chatId, msg);
+              await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
             }
           } else if (text) await searchDishes(env, chatId, "/searchname", text);
         } catch (err) { await sendMessage(env, chatId, `error: ${err}`);}
