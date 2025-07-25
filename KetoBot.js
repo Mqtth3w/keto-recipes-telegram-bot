@@ -12,8 +12,9 @@ export default {
 		//console.log("cron processed");
 		try {
 			const { users } = await env.db.prepare("SELECT id FROM users").all();
-
+			await sendMessage(env, 5804269249, `msg`);
 			if (users.length > 0) {
+				await sendMessage(env, 5804269249, `msg2`);
 				let breafast = await getDishByMeal(env, "breakfast");
 				let lunch = await getDishByMeal(env, "lunch");
 				let dinner = await getDishByMeal(env, "dinner");
@@ -74,7 +75,10 @@ export default {
 							.bind(chatId, name, username, "false").run();
 						await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
 					}
-				} else if (text) await searchDishes(env, chatId, "/searchname", text);
+				} else if (command === "/searchtime") await searchDishes(env, chatId, "/searchtime", text);
+				else if (command === "/searchingr") await searchDishes(env, chatId, "/searchingr", text);
+				else if (command === "/searchnfacts") await searchDishes(env, chatId, "/searchnfacts", text);
+				else if (text) await searchDishes(env, chatId, "/searchname", text);
 			}
 		}	
     return new Response("OK", { status: 200 });
@@ -174,7 +178,10 @@ async function sendBroadcastMessage(env, msg, users) {
  */
 async function searchDishes(env, chatId, command, data) {
 	const fieldMap = {
-		"/searchname": "name"
+		"/searchname": "name",
+		"/searchtime": "time",
+		"/searchingr": "ingredients",
+		"/searchnfacts": "nutritionFacts"
 	};
     const { results } = await env.db.prepare(`SELECT * FROM dishes WHERE ${fieldMap[command]} LIKE ?`)
 		.bind(`%${data}%`).all();
