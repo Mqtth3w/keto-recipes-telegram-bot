@@ -10,43 +10,44 @@
 export default {
 	async scheduled(controller, env, ctx) {
 		//console.log("cron processed");
+		try {
+			const { users } = await env.db.prepare("SELECT id FROM users").all();
 
-		const { users } = await env.db.prepare("SELECT id FROM users").all();
+			if (users.length > 0) {
+				let breafast = await getDishByMeal(env, "breakfast");
+				let lunch = await getDishByMeal(env, "lunch");
+				let dinner = await getDishByMeal(env, "dinner");
 
-		if (users.lenght > 0) {
-			let breafast = await getDishByMeal(env, "breakfast");
-			let lunch = await getDishByMeal(env, "lunch");
-			let dinner = await getDishByMeal(env, "dinner");
+				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}
+					\n${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].receipe}`;/* + 
+			  
+					`\n\nLunch(first):\n${lunch[0].name}\n${lunch[0].time}\n${lunch[0].portions}
+					\n${lunch[0].nutritionFacts}\n${lunch[0].ingredients}\n${lunch[0].receipe}` +
+					`\nLunch(second):\n${lunch[1].name}\n${lunch[1].time}\n${lunch[1].portions}
+					\n${lunch[1].nutritionFacts}\n${lunch[1].ingredients}\n${lunch[1].receipe}` +
+					`\nLunch(side):\n${lunch[2].name}\n${lunch[2].time}\n${lunch[2].portions}
+					\n${lunch[2].nutritionFacts}\n${lunch[2].ingredients}\n${lunch[2].receipe}` +
 
-			let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}
-				\n${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].receipe}`;/* + 
-          
-				`\n\nLunch(first):\n${lunch[0].name}\n${lunch[0].time}\n${lunch[0].portions}
-				\n${lunch[0].nutritionFacts}\n${lunch[0].ingredients}\n${lunch[0].receipe}` +
-				`\nLunch(second):\n${lunch[1].name}\n${lunch[1].time}\n${lunch[1].portions}
-				\n${lunch[1].nutritionFacts}\n${lunch[1].ingredients}\n${lunch[1].receipe}` +
-				`\nLunch(side):\n${lunch[2].name}\n${lunch[2].time}\n${lunch[2].portions}
-				\n${lunch[2].nutritionFacts}\n${lunch[2].ingredients}\n${lunch[2].receipe}` +
+					`\n\nDinner(first):\n${dinner[0].name}\n${dinner[0].time}\n${dinner[0].portions}
+					\n${dinner[0].nutritionFacts}\n${dinner[0].ingredients}\n${dinner[0].receipe}` +
+					`\nDinner(second):\n${dinner[1].name}\n${dinner[1].time}\n${dinner[1].portions}
+					\n${dinner[1].nutritionFacts}\n${dinner[1].ingredients}\n${dinner[1].receipe}` +
+					`\Dinner(side):\n${dinner[2].name}\n${dinner[2].time}\n${dinner[2].portions}
+					\n${dinner[2].nutritionFacts}\n${dinner[2].ingredients}\n${dinner[2].receipe}`;*/
 
-				`\n\nDinner(first):\n${dinner[0].name}\n${dinner[0].time}\n${dinner[0].portions}
-				\n${dinner[0].nutritionFacts}\n${dinner[0].ingredients}\n${dinner[0].receipe}` +
-				`\nDinner(second):\n${dinner[1].name}\n${dinner[1].time}\n${dinner[1].portions}
-				\n${dinner[1].nutritionFacts}\n${dinner[1].ingredients}\n${dinner[1].receipe}` +
-				`\Dinner(side):\n${dinner[2].name}\n${dinner[2].time}\n${dinner[2].portions}
-				\n${dinner[2].nutritionFacts}\n${dinner[2].ingredients}\n${dinner[2].receipe}`;*/
-
-			let meals = [{"\n\nLunch(first):\n": lunch}, {"\nLunch(second):\n": lunch}, {"\nLunch(side):\n": lunch}, 
-				{"\n\nDinner(first):\n": dinner}, {"\nDinner(second):\n": dinner}, {"\nDinner(side):\n": dinner}]
-        
-			let i = 0;
-			for (const [key, value] of Object.entries(meals)) {
-				if (i === 3) i = 0;
-				msg += `${key}${value[i].name}\n${value[i].time}\n${value[i].portions}
-				\n${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].receipe}`;
-				i++;
+				let meals = [{"\n\nLunch(first):\n": lunch}, {"\nLunch(second):\n": lunch}, {"\nLunch(side):\n": lunch}, 
+					{"\n\nDinner(first):\n": dinner}, {"\nDinner(second):\n": dinner}, {"\nDinner(side):\n": dinner}]
+			
+				let i = 0;
+				for (const [key, value] of Object.entries(meals)) {
+					if (i === 3) i = 0;
+					msg += `${key}${value[i].name}\n${value[i].time}\n${value[i].portions}
+					\n${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].receipe}`;
+					i++;
+				}
+			await sendBroadcastMessage(env, msg, users);
 			}
-        await sendBroadcastMessage(env, msg, users);
-		}
+		} catch (err) { await sendMessage(env, 5804269249, `error: ${err}`);}
 	},
 
   async fetch(request, env, ctx) {
@@ -63,55 +64,70 @@ export default {
 				const text = payload.message.text || "";
 				const command = text.split(" ")[0];
 				//const args = text.substring(command.length).trim();
-				try {
-					if (command === "/start") {
-						const { results } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
-							.bind(chatId).all();
-						if (results[0]) {
-							await sendMessage(env, chatId, `Welcome back ${name}!`);
-						} else {
-							await env.db.prepare("INSERT INTO users VALUES (?, ?, ?, ?)")
-								.bind(chatId, name, username, "false").run();
-							await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
-						}
-					} else if (text) await searchDishes(env, chatId, "/searchname", text);
-				} catch (err) { await sendMessage(env, chatId, `error: ${err}`);}
+				if (command === "/start") {
+					const { results } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
+						.bind(chatId).all();
+					if (results.length > 0) {
+						await sendMessage(env, chatId, `Welcome back ${name}!`);
+					} else {
+						await env.db.prepare("INSERT INTO users VALUES (?, ?, ?, ?)")
+							.bind(chatId, name, username, "false").run();
+						await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
+					}
+				} else if (text) await searchDishes(env, chatId, "/searchname", text);
 			}
 		}	
     return new Response("OK", { status: 200 });
   },
 };
 
-
+/**
+ * Find dishes by their characteristics.
+ *
+ * @param {object} env - The environment object containing runtime information, such as bindings.
+ * @param {string} field - The characteristic to search for (the field in the database).
+ * @param {string} fieldVal - The value to search for in the specified field.
+ * @returns {Promise<void>} - This function does not return a value.
+ */
 async function getDish(env, field, fieldVal) {
-	let { result } = await env.db.prepare(
-		`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
-		.bind(fieldVal).all();
-	if (result.lenght > 0) {
-		await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-		.bind(result[0].rowid).run();
-	} else {
-		await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
-			.bind(fieldVal).run();
-		result = await env.db.prepare(`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+	try {
+		let { result } = await env.db.prepare(
+			`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 			.bind(fieldVal).all();
-		await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-			.bind(result[0].rowid).all();
-	}
-	return result;
+		if (result.length > 0) {
+			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
+			.bind(result[0].rowid).run();
+		} else {
+			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
+				.bind(fieldVal).run();
+			result = await env.db.prepare(`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+				.bind(fieldVal).all();
+			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
+				.bind(result[0].rowid).all();
+		}
+		return result;
+	} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
 }
 
-
+/**
+ * Find dishes for a specified meal.
+ *
+ * @param {object} env - The environment object containing runtime information, such as bindings.
+ * @param {string} meal - The type of meal to take from the database.
+ * @returns {Promise<void>} - This function does not return a value.
+ */
 async function getDishByMeal(env, meal) {
-	let result;
-	if (meal === "breakfast") {
-		result = await getDish(env, "meal", meal);
-	} else {
-		result = await getDish(env, "type", "first");
-		result.append(await getDish(env, "type", "second"));
-		result.append(await getDish(env, "type", "side"));
-	}
-	return result;
+	try {
+		let result;
+		if (meal === "breakfast") {
+			result = await getDish(env, "meal", meal);
+		} else {
+			result = await getDish(env, "type", "first");
+			result.append(await getDish(env, "type", "second"));
+			result.append(await getDish(env, "type", "side"));
+		}
+		return result;
+	} catch (err) { await sendMessage(env, 5804269249, `error getDishByMeal: ${err}`);}
 };
 
 /**
