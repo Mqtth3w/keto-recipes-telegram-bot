@@ -64,7 +64,7 @@ export default {
 				const username = payload.message.chat.username || ""
 				const text = payload.message.text || "";
 				const command = text.split(" ")[0];
-				//const args = text.substring(command.length).trim();
+				const args = text.substring(command.length).trim();
 				if (command === "/start") {
 					const { results } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
 						.bind(chatId).all();
@@ -75,9 +75,9 @@ export default {
 							.bind(chatId, name, username, "false").run();
 						await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
 					}
-				} else if (command === "/searchtime") await searchDishes(env, chatId, "/searchtime", text);
-				else if (command === "/searchingr") await searchDishes(env, chatId, "/searchingr", text);
-				else if (command === "/searchnfacts") await searchDishes(env, chatId, "/searchnfacts", text);
+				} else if (command === "/searchtime") await searchDishes(env, chatId, "/searchtime", args);
+				else if (command === "/searchingr") await searchDishes(env, chatId, "/searchingr", args);
+				else if (command === "/searchnfacts") await searchDishes(env, chatId, "/searchnfacts", args);
 				else if (text) await searchDishes(env, chatId, "/searchname", text);
 			}
 		}	
