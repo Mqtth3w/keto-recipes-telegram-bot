@@ -1,6 +1,6 @@
 # Keto recipes Telegram bot [![Awesome](https://cdn.jsdelivr.net/gh/sindresorhus/awesome@d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/Mqtth3w/keto-receips-Telegram-bot)
 
-A Telegram bot to receive ketogenic recipes for breakfast, lunch and dinner every day. I called it "keto" because I based my implementation on a database of 120 ketogenic dishes but it can be used with any type of dishes by adding/changing them in your database.
+A Telegram bot to receive ketogenic recipes for breakfast, lunch and dinner every day. I called it "keto" because I based my implementation on a database of 120 ketogenic dishes. But it can be used with any type of dishes by adding/changing them in your database.
 
 This bot is dedicated to "Silvia".
 
