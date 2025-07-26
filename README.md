@@ -42,12 +42,17 @@ It can handle 100k requests for free per day (Cloudflare limits).
 
 # 📜 User guide 
 
-- Send any text to search a receipe by name.
+- Send any text to search a dish by name.
 - Every day the bot will send you meals for all the day.
+- `/searchtime` searchs dishes by their cooking/preparing time.
+- `searchingr` searchs dishes by their ingredients.
+- `searchnfacts` searchs dishes by their nutrition facts.
 
 
 # 🛠️ To do 
-- Search dishes by their properties (e.g., nutrition facts, receips, meal, etc)
+- More commands
+- More recips
+- More languages
 
 # 💭 Discussion 
 For any comment or to request a new feature you can either use the [Discussions](https://github.com/Mqtth3w/keto-receips-telegram-bot/discussions) section or contact me through this [bot](https://t.me/Mqtth3w_support_bot).
