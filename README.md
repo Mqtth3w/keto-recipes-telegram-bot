@@ -44,7 +44,7 @@ It can handle 100k requests for free per day (Cloudflare limits).
 
 - Send any text to search a dish by name.
 - Every day the bot will send you meals for all the day.
-- `/searchtime <time>` searchs dishes by their cooking/preparing time, e.g., /searchtime 10 min.
+- `/searchtime <time>` searchs dishes by their cooking/preparing time, e.g., `/searchtime 10 min`.
 - `/searchingr <ingredients>` searchs dishes by their ingredients.
 - `/searchnfacts <nutrition facts>` searchs dishes by their nutrition facts.
 
