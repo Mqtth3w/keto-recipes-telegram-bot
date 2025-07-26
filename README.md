@@ -1,4 +1,4 @@
-# Keto receips Telegram bot [![Awesome](https://cdn.jsdelivr.net/gh/sindresorhus/awesome@d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/Mqtth3w/keto-receips-Telegram-bot)
+# Keto recipes Telegram bot [![Awesome](https://cdn.jsdelivr.net/gh/sindresorhus/awesome@d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/Mqtth3w/keto-receips-Telegram-bot)
 
 A Telegram bot to receive ketogenic recipes for breakfast, lunch and dinner every day.
 
