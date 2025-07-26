@@ -11,9 +11,7 @@ export default {
 	async scheduled(controller, env, ctx) {
 		try {
 			const { results } = await env.db.prepare("SELECT id FROM users").all();
-			await sendMessage(env, 5804269249, `msg`);
 			if (results.length > 0) {
-				await sendMessage(env, 5804269249, `msg2`);
 				let breafast = await getDishByMeal(env, "breakfast");
 				let lunch = await getDishByMeal(env, "lunch");
 				let dinner = await getDishByMeal(env, "dinner");
@@ -94,21 +92,21 @@ export default {
  */
 async function getDish(env, field, fieldVal) {
 	try {
-		let { result } = await env.db.prepare(
+		let { results } = await env.db.prepare(
 			`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 			.bind(fieldVal).all();
-		if (result.length > 0) {
+		if (results.length > 0) {
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-			.bind(result[0].rowid).run();
+			.bind(results[0].rowid).run();
 		} else {
 			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
 				.bind(fieldVal).run();
-			result = await env.db.prepare(`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+			results = await env.db.prepare(`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 				.bind(fieldVal).all();
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-				.bind(result[0].rowid).all();
+				.bind(results[0].rowid).all();
 		}
-		return result;
+		return results;
 	} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
 }
 
@@ -121,15 +119,15 @@ async function getDish(env, field, fieldVal) {
  */
 async function getDishByMeal(env, meal) {
 	try {
-		let result;
+		let results = {};
 		if (meal === "breakfast") {
-			result = await getDish(env, "meal", meal);
+			results = await getDish(env, "meal", meal);
 		} else {
-			result = await getDish(env, "type", "first");
-			result[1] =await getDish(env, "type", "second");
-			result[2] = await getDish(env, "type", "side");
+			results[0] = await getDish(env, "type", "first");
+			results[1] =await getDish(env, "type", "second");
+			results[2] = await getDish(env, "type", "side");
 		}
-		return result;
+		return results;
 	} catch (err) { await sendMessage(env, 5804269249, `error getDishByMeal: ${err}`);}
 };
 
