@@ -9,7 +9,6 @@
 
 export default {
 	async scheduled(controller, env, ctx) {
-		//console.log("cron processed");
 		try {
 			const { users } = await env.db.prepare("SELECT id FROM users").all();
 			await sendMessage(env, 5804269249, `msg`);
@@ -20,21 +19,21 @@ export default {
 				let dinner = await getDishByMeal(env, "dinner");
 
 				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}
-					\n${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].receipe}`;/* + 
+					\n${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;/* + 
 			  
 					`\n\nLunch(first):\n${lunch[0].name}\n${lunch[0].time}\n${lunch[0].portions}
-					\n${lunch[0].nutritionFacts}\n${lunch[0].ingredients}\n${lunch[0].receipe}` +
+					\n${lunch[0].nutritionFacts}\n${lunch[0].ingredients}\n${lunch[0].recipe}` +
 					`\nLunch(second):\n${lunch[1].name}\n${lunch[1].time}\n${lunch[1].portions}
-					\n${lunch[1].nutritionFacts}\n${lunch[1].ingredients}\n${lunch[1].receipe}` +
+					\n${lunch[1].nutritionFacts}\n${lunch[1].ingredients}\n${lunch[1].recipe}` +
 					`\nLunch(side):\n${lunch[2].name}\n${lunch[2].time}\n${lunch[2].portions}
-					\n${lunch[2].nutritionFacts}\n${lunch[2].ingredients}\n${lunch[2].receipe}` +
+					\n${lunch[2].nutritionFacts}\n${lunch[2].ingredients}\n${lunch[2].recipe}` +
 
 					`\n\nDinner(first):\n${dinner[0].name}\n${dinner[0].time}\n${dinner[0].portions}
-					\n${dinner[0].nutritionFacts}\n${dinner[0].ingredients}\n${dinner[0].receipe}` +
+					\n${dinner[0].nutritionFacts}\n${dinner[0].ingredients}\n${dinner[0].recipe}` +
 					`\nDinner(second):\n${dinner[1].name}\n${dinner[1].time}\n${dinner[1].portions}
-					\n${dinner[1].nutritionFacts}\n${dinner[1].ingredients}\n${dinner[1].receipe}` +
+					\n${dinner[1].nutritionFacts}\n${dinner[1].ingredients}\n${dinner[1].recipe}` +
 					`\Dinner(side):\n${dinner[2].name}\n${dinner[2].time}\n${dinner[2].portions}
-					\n${dinner[2].nutritionFacts}\n${dinner[2].ingredients}\n${dinner[2].receipe}`;*/
+					\n${dinner[2].nutritionFacts}\n${dinner[2].ingredients}\n${dinner[2].recipe}`;*/
 
 				let meals = [{"\n\nLunch(first):\n": lunch}, {"\nLunch(second):\n": lunch}, {"\nLunch(side):\n": lunch}, 
 					{"\n\nDinner(first):\n": dinner}, {"\nDinner(second):\n": dinner}, {"\nDinner(side):\n": dinner}]
@@ -43,7 +42,7 @@ export default {
 				for (const [key, value] of Object.entries(meals)) {
 					if (i === 3) i = 0;
 					msg += `${key}${value[i].name}\n${value[i].time}\n${value[i].portions}
-					\n${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].receipe}`;
+					\n${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].recipe}`;
 					i++;
 				}
 			await sendBroadcastMessage(env, msg, users);
@@ -127,8 +126,8 @@ async function getDishByMeal(env, meal) {
 			result = await getDish(env, "meal", meal);
 		} else {
 			result = await getDish(env, "type", "first");
-			result.append(await getDish(env, "type", "second"));
-			result.append(await getDish(env, "type", "side"));
+			result[1] =await getDish(env, "type", "second");
+			result[2] = await getDish(env, "type", "side");
 		}
 		return result;
 	} catch (err) { await sendMessage(env, 5804269249, `error getDishByMeal: ${err}`);}
@@ -188,7 +187,7 @@ async function searchDishes(env, chatId, command, data) {
     if (results.length === 0) return await sendMessage(env, chatId, `No data`);
     let total = 0;
 	let message = "";
-	const batchSize = 25;
+	const batchSize = 5;
 	for (let i = 0; i < results.length; i++) {
 		const dish = results[i];
 		total++;
@@ -196,7 +195,7 @@ async function searchDishes(env, chatId, command, data) {
 			`Cooking time: ${dish.time}\n` +
 			`Nutrition facts: ${dish.nutritionFacts}\n` +
 			`Ingredients: ${dish.ingredients}\n` +
-			`Recipe: ${dish.receipe}\n` +
+			`Recipe: ${dish.recipe}\n` +
 			`Type: ${dish.type}\n` +
 			`Category: ${dish.category}\n` +
 			`Already taken: ${dish.alreadyTaken}\n` +
