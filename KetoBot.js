@@ -10,18 +10,18 @@
 export default {
 	async scheduled(controller, env, ctx) {
 		try {
-			const { users } = await env.db.prepare("SELECT id FROM users").all();
+			const { results } = await env.db.prepare("SELECT id FROM users").all();
 			await sendMessage(env, 5804269249, `msg`);
-			if (users.length > 0) {
+			if (results.length > 0) {
 				await sendMessage(env, 5804269249, `msg2`);
 				let breafast = await getDishByMeal(env, "breakfast");
 				let lunch = await getDishByMeal(env, "lunch");
 				let dinner = await getDishByMeal(env, "dinner");
 
-				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}
-					\n${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;/* + 
+				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}\n` +
+					`${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;/* + 
 			  
-					`\n\nLunch(first):\n${lunch[0].name}\n${lunch[0].time}\n${lunch[0].portions}
+					`\n\nLunch(first):\n${lunch[0].name}\n${lunch[0].time}\n${lunch[0].portions}` +
 					\n${lunch[0].nutritionFacts}\n${lunch[0].ingredients}\n${lunch[0].recipe}` +
 					`\nLunch(second):\n${lunch[1].name}\n${lunch[1].time}\n${lunch[1].portions}
 					\n${lunch[1].nutritionFacts}\n${lunch[1].ingredients}\n${lunch[1].recipe}` +
@@ -41,11 +41,11 @@ export default {
 				let i = 0;
 				for (const [key, value] of Object.entries(meals)) {
 					if (i === 3) i = 0;
-					msg += `${key}${value[i].name}\n${value[i].time}\n${value[i].portions}
-					\n${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].recipe}`;
+					msg += `${key}${value[i].name}\n${value[i].time}\n${value[i].portions}\n` + 
+						`${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].recipe}`;
 					i++;
 				}
-			await sendBroadcastMessage(env, msg, users);
+			await sendBroadcastMessage(env, msg, results);
 			}
 		} catch (err) { await sendMessage(env, 5804269249, `error: ${err}`);}
 	},
