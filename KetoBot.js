@@ -93,7 +93,7 @@ export default {
 async function getDish(env, field, fieldVal) {
 	try {
 		let { results } = await env.db.prepare(
-			`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+			`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 			.bind(fieldVal).all();
 		if (results.length > 0) {
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
@@ -101,10 +101,10 @@ async function getDish(env, field, fieldVal) {
 		} else {
 			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
 				.bind(fieldVal).run();
-			results = await env.db.prepare(`SELECT * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
+			results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 				.bind(fieldVal).all();
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-				.bind(results[0].rowid).all();
+				.bind(results[0].rowid).run();
 		}
 		return results;
 	} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
@@ -160,7 +160,7 @@ async function sendMessage(env, chatId, text) {
 async function sendBroadcastMessage(env, msg, users) {
 	for (const userId of users) {
 		await sendMessage(env, userId, msg);
-		await new Promise(resolve => setTimeout(resolve, 33)); // Avoid hitting rate limits (30 messages/second      
+		await new Promise(resolve => setTimeout(resolve, 31)); // Avoid hitting rate limits (30 messages/second)     
 	}
 };
 
