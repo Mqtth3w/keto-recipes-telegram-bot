@@ -51,7 +51,7 @@ It can handle 100k requests for free per day (Cloudflare limits).
 
 # 🛠️ To do 
 - More commands
-- More recips
+- More recipes
 - More languages
 
 # 💭 Discussion 
