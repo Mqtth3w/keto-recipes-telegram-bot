@@ -82,29 +82,22 @@ export default {
   },
 };
 
-/**
- * Find dishes by their characteristics.
- *
- * @param {object} env - The environment object containing runtime information, such as bindings.
- * @param {string} field - The characteristic to search for (the field in the database).
- * @param {string} fieldVal - The value to search for in the specified field.
- * @returns {Promise<>} - This function does not return a value.
- */
+
 async function getDish(env, field, fieldVal) {
 	try {
 		let { results } = await env.db.prepare(
 			`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 			.bind(fieldVal).all();
-			await sendMessage(env, 5804269249, `results 1 ${results}`);
+			await sendMessage(env, 5804269249, `results 1 ${results[0]}`);
 		if (results.length > 0) {
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-			.bind(results[0].rowid).run();
+				.bind(results[0].rowid).run();
 		} else {
 			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
 				.bind(fieldVal).run();
 			results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
 				.bind(fieldVal).all();
-			await sendMessage(env, 5804269249, `results 2 ${results}`);
+			await sendMessage(env, 5804269249, `results 2 ${results[0]}`);
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
 				.bind(results[0].rowid).run();
 		}
@@ -112,13 +105,7 @@ async function getDish(env, field, fieldVal) {
 	} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
 }
 
-/**
- * Find dishes for a specified meal.
- *
- * @param {object} env - The environment object containing runtime information, such as bindings.
- * @param {string} meal - The type of meal to take from the database.
- * @returns {Promise<>} - This function does not return a value.
- */
+
 async function getDishByMeal(env, meal) {
 	try {
 		let results = {};
