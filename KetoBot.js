@@ -12,9 +12,13 @@ export default {
 		try {
 			const { results } = await env.db.prepare("SELECT id FROM users").all();
 			if (results.length > 0) {
+				await sendMessage(env, 5804269249, `results id ${results[0].id}`);
 				let breafast = await getDishByMeal(env, "breakfast");
+				await sendMessage(env, 5804269249, `breafast ${breafast[0]}`);
 				let lunch = await getDishByMeal(env, "lunch");
+				await sendMessage(env, 5804269249, `lunch ${lunch[0]}`);
 				let dinner = await getDishByMeal(env, "dinner");
+				await sendMessage(env, 5804269249, `dinner ${dinner[0]}`);
 				
 				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}\n` +
 					`${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;
