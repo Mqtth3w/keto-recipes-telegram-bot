@@ -15,27 +15,13 @@ export default {
 				let breafast = await getDishByMeal(env, "breakfast");
 				let lunch = await getDishByMeal(env, "lunch");
 				let dinner = await getDishByMeal(env, "dinner");
-
+				
 				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}\n` +
-					`${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;/* + 
-			  
-					`\n\nLunch(first):\n${lunch[0].name}\n${lunch[0].time}\n${lunch[0].portions}` +
-					\n${lunch[0].nutritionFacts}\n${lunch[0].ingredients}\n${lunch[0].recipe}` +
-					`\nLunch(second):\n${lunch[1].name}\n${lunch[1].time}\n${lunch[1].portions}
-					\n${lunch[1].nutritionFacts}\n${lunch[1].ingredients}\n${lunch[1].recipe}` +
-					`\nLunch(side):\n${lunch[2].name}\n${lunch[2].time}\n${lunch[2].portions}
-					\n${lunch[2].nutritionFacts}\n${lunch[2].ingredients}\n${lunch[2].recipe}` +
-
-					`\n\nDinner(first):\n${dinner[0].name}\n${dinner[0].time}\n${dinner[0].portions}
-					\n${dinner[0].nutritionFacts}\n${dinner[0].ingredients}\n${dinner[0].recipe}` +
-					`\nDinner(second):\n${dinner[1].name}\n${dinner[1].time}\n${dinner[1].portions}
-					\n${dinner[1].nutritionFacts}\n${dinner[1].ingredients}\n${dinner[1].recipe}` +
-					`\Dinner(side):\n${dinner[2].name}\n${dinner[2].time}\n${dinner[2].portions}
-					\n${dinner[2].nutritionFacts}\n${dinner[2].ingredients}\n${dinner[2].recipe}`;*/
-
+					`${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;
+				
 				let meals = [{"\n\nLunch(first):\n": lunch}, {"\nLunch(second):\n": lunch}, {"\nLunch(side):\n": lunch}, 
 					{"\n\nDinner(first):\n": dinner}, {"\nDinner(second):\n": dinner}, {"\nDinner(side):\n": dinner}]
-			
+				
 				let i = 0;
 				for (const [key, value] of Object.entries(meals)) {
 					if (i === 3) i = 0;
@@ -43,7 +29,7 @@ export default {
 						`${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].recipe}`;
 					i++;
 				}
-			await sendBroadcastMessage(env, msg, results);
+				await sendBroadcastMessage(env, msg, results);
 			}
 		} catch (err) { await sendMessage(env, 5804269249, `error scheduled: ${err}`);}
 	},
