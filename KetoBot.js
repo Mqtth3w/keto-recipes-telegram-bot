@@ -87,17 +87,17 @@ async function getDish(env, field, fieldVal) {
 	try {
 		let { results } = await env.db.prepare(
 			`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
-			.bind(fieldVal).all();
-			await sendMessage(env, 5804269249, `results 1 ${results[0]}`);
+			.bind(`%${fieldVal}%`).all();
+			await sendMessage(env, 5804269249, `results 1 ${results[0].rowid}`);
 		if (results.length > 0) {
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-				.bind(results[0].rowid).run();
+				.bind(result[0].rowid).run();
 		} else {
-			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} = ?`)
-				.bind(fieldVal).run();
-			results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
-				.bind(fieldVal).all();
-			await sendMessage(env, 5804269249, `results 2 ${results[0]}`);
+			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} LIKE ?`)
+				.bind(`%${fieldVal}%`).run();
+			results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken = 'false' AND ${field} LIKE ? LIMIT 1`)
+				.bind(`%${fieldVal}%`).all();
+			await sendMessage(env, 5804269249, `results 2 ${results[0].toString()}`);
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
 				.bind(results[0].rowid).run();
 		}
@@ -113,7 +113,7 @@ async function getDishByMeal(env, meal) {
 			results = await getDish(env, "meal", meal);
 		} else {
 			results[0] = await getDish(env, "type", "first");
-			results[1] =await getDish(env, "type", "second");
+			results[1] = await getDish(env, "type", "second");
 			results[2] = await getDish(env, "type", "side");
 		}
 		return results;
