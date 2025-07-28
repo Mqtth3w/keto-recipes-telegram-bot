@@ -45,7 +45,7 @@ export default {
 				}
 			await sendBroadcastMessage(env, msg, results);
 			}
-		} catch (err) { await sendMessage(env, 5804269249, `error: ${err}`);}
+		} catch (err) { await sendMessage(env, 5804269249, `error scheduled: ${err}`);}
 	},
 
   async fetch(request, env, ctx) {
