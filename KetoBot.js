@@ -91,7 +91,7 @@ async function getDish(env, field, fieldVal) {
 			await sendMessage(env, 5804269249, `results 1 ${results[0].rowid}`);
 		if (results.length > 0) {
 			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-				.bind(result[0].rowid).run();
+				.bind(results[0].rowid).run();
 		} else {
 			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} LIKE ?`)
 				.bind(`%${fieldVal}%`).run();
