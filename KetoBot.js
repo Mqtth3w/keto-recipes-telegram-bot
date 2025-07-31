@@ -9,33 +9,47 @@
 
 export default {
 	async scheduled(controller, env, ctx) {
-		try {
-			const { results } = await env.db.prepare("SELECT id FROM users").all();
-			if (results.length > 0) {
-				await sendMessage(env, 5804269249, `results id ${results[0].id}`);
-				let breafast = await getDishByMeal(env, "breakfast");
-				await sendMessage(env, 5804269249, `breafast ${breafast[0]}`);
-				let lunch = await getDishByMeal(env, "lunch");
-				await sendMessage(env, 5804269249, `lunch ${lunch[0]}`);
-				let dinner = await getDishByMeal(env, "dinner");
-				await sendMessage(env, 5804269249, `dinner ${dinner[0]}`);
+		const { results } = await env.db.prepare("SELECT id FROM users").all();
+		if (results.length > 0) {
+			let meals = ["breakfast", "lunch", "dinner"];
+			let types = ["first", "second", "side"];
+			let msg = "";
+			for (const meal of meals) {
+				for (let i = 0; i < 3; i++) {
 				
-				let msg = `Breakfast:\n${breafast[0].name}\n${breafast[0].time}\n${breafast[0].portions}\n` +
-					`${breafast[0].nutritionFacts}\n${breafast[0].ingredients}\n${breafast[0].recipe}`;
-				
-				let meals = [{"\n\nLunch(first):\n": lunch}, {"\nLunch(second):\n": lunch}, {"\nLunch(side):\n": lunch}, 
-					{"\n\nDinner(first):\n": dinner}, {"\nDinner(second):\n": dinner}, {"\nDinner(side):\n": dinner}]
-				
-				let i = 0;
-				for (const [key, value] of Object.entries(meals)) {
-					if (i === 3) i = 0;
-					msg += `${key}${value[i].name}\n${value[i].time}\n${value[i].portions}\n` + 
-						`${value[i].nutritionFacts}\n${value[i].ingredients}\n${value[i].recipe}`;
-					i++;
+					try {
+						let { results } = await env.db.prepare(
+							`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${meal === "breakfast" ? "meal" : "type"} LIKE ? LIMIT 1`)
+							.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
+						if (results.length > 0) {
+							await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
+								.bind(results[0].rowid).run();
+						} else {
+							await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${meal === "breakfast" ? "meal" : "type"} LIKE ?`)
+								.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).run();
+							results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken = 'false' AND ${meal === "breakfast" ? "meal" : "type"} LIKE ? LIMIT 1`)
+								.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
+							await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
+								.bind(results[0].rowid).run();
+						}
+						
+						msg += `${meal}${meal === "breakfast" ? "" :  "(" + ${types[i]} + ")"}:\nDish name: ${results[0].name}\n` +
+							`Cooking time: ${results[0].time}\n` +
+							`Nutrition facts: ${results[0].nutritionFacts}\n` +
+							`Ingredients: ${results[0].ingredients}\n` +
+							`Recipe: ${results[0].recipe}\n` +
+							`Type: ${results[0].type}\n` +
+							`Category: ${results[0].category}\n` +
+							`Already taken: ${results[0].alreadyTaken}\n` +
+							`Meal: ${results[0].meal}\n\n`;
+						
+					} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
+					
+					if (meal === "breakfast") break;
 				}
-				await sendBroadcastMessage(env, msg, results);
 			}
-		} catch (err) { await sendMessage(env, 5804269249, `error scheduled: ${err}`);}
+			await sendBroadcastMessage(env, msg, results.map(user => user.id));
+		}
 	},
 
   async fetch(request, env, ctx) {
@@ -70,44 +84,6 @@ export default {
 		}	
     return new Response("OK", { status: 200 });
   },
-};
-
-
-async function getDish(env, field, fieldVal) {
-	try {
-		let { results } = await env.db.prepare(
-			`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${field} LIKE ? LIMIT 1`)
-			.bind(`%${fieldVal}%`).all();
-			await sendMessage(env, 5804269249, `results 1 ${results[0].rowid}`);
-		if (results.length > 0) {
-			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-				.bind(results[0].rowid).run();
-		} else {
-			await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${field} LIKE ?`)
-				.bind(`%${fieldVal}%`).run();
-			results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken = 'false' AND ${field} LIKE ? LIMIT 1`)
-				.bind(`%${fieldVal}%`).all();
-			await sendMessage(env, 5804269249, `results 2 ${results[0].toString()}`);
-			await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
-				.bind(results[0].rowid).run();
-		}
-		return results;
-	} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
-}
-
-
-async function getDishByMeal(env, meal) {
-	try {
-		let results = {};
-		if (meal === "breakfast") {
-			results = await getDish(env, "meal", meal);
-		} else {
-			results[0] = await getDish(env, "type", "first");
-			results[1] = await getDish(env, "type", "second");
-			results[2] = await getDish(env, "type", "side");
-		}
-		return results;
-	} catch (err) { await sendMessage(env, 5804269249, `error getDishByMeal: ${err}`);}
 };
 
 /**
