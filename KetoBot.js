@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview A worker to send to hadle a Telegram bot to send breakfast, lunch and dinner receips to all its users.
  * 
@@ -10,17 +11,17 @@
 export default {
 	async scheduled(controller, env, ctx) {
 		try {
-			let { users } = await env.db.prepare("SELECT id FROM users").all();
+			const { users } = await env.db.prepare("SELECT id FROM users").all();
 			if (users.length > 0) {
 				let meals = ["breakfast", "lunch", "dinner"];
 				let types = ["first", "second", "side"];
 				let msg = "";
 				for (const meal of meals) {
 					for (let i = 0; i < 3; i++) {
-					
+
 						let { results } = await env.db.prepare(
-							`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${meal === "breakfast" ? "meal" : "type"} LIKE ? LIMIT 1`)
-							.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
+											`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${meal === "breakfast" ? "meal" : "type"} LIKE ? LIMIT 1`)
+											.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
 						if (results.length > 0) {
 							await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
 								.bind(results[0].rowid).run();
@@ -28,13 +29,13 @@ export default {
 							await env.db.prepare(`UPDATE dishes SET alreadyTaken = 'false' WHERE ${meal === "breakfast" ? "meal" : "type"} LIKE ?`)
 								.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).run();
 							results = await env.db.prepare(`SELECT rowid, * FROM dishes WHERE alreadyTaken = 'false' AND ${meal === "breakfast" ? "meal" : "type"} LIKE ? LIMIT 1`)
-								.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
+										.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
 							await env.db.prepare("UPDATE dishes SET alreadyTaken = 'true' WHERE rowid = ?")
 								.bind(results[0].rowid).run();
 						}
-						
+
 						msg += `${meal}${meal === "breakfast" ? "" : "(" + types[i] + ")"}:\nDish name: ${results[0].name}\nCooking time: ${results[0].time}\nNutrition facts: ${results[0].nutritionFacts}\nIngredients: ${results[0].ingredients}\nRecipe: ${results[0].recipe}\nType: ${results[0].type}\nCategory: ${results[0].category}\nAlready taken: ${results[0].alreadyTaken}\nMeal: ${results[0].meal}\n\n`;
-						
+
 						if (meal === "breakfast") break;
 					}
 				}
@@ -43,38 +44,38 @@ export default {
 		} catch (err) { await sendMessage(env, 5804269249, `error scheduled: ${err}`);}
 	},
 
-  async fetch(request, env, ctx) {
-    const secret_token = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-		if (secret_token !== env.SECRET_TOKEN) {
-			return new Response("Authentication Failed.", { status: 403 });
-		}
-		if (request.method === "POST") {
-			const payload = await request.json();
-			if ('message' in payload) {
-				const chatId = payload.message.chat.id.toString();
-				const name = payload.message.chat.first_name || "";
-				const username = payload.message.chat.username || ""
-				const text = payload.message.text || "";
-				const command = text.split(" ")[0];
-				const args = text.substring(command.length).trim();
-				if (command === "/start") {
-					const { results } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
-						.bind(chatId).all();
-					if (results.length > 0) {
-						await sendMessage(env, chatId, `Welcome back ${name}!`);
-					} else {
-						await env.db.prepare("INSERT INTO users VALUES (?, ?, ?, ?)")
-							.bind(chatId, name, username, "false").run();
-						await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
-					}
-				} else if (command === "/searchtime") await searchDishes(env, chatId, "/searchtime", args);
-				else if (command === "/searchingr") await searchDishes(env, chatId, "/searchingr", args);
-				else if (command === "/searchnfacts") await searchDishes(env, chatId, "/searchnfacts", args);
-				else if (text) await searchDishes(env, chatId, "/searchname", text);
+  	async fetch(request, env, ctx) {
+    	const secret_token = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
+			if (secret_token !== env.SECRET_TOKEN) {
+				return new Response("Authentication Failed.", { status: 403 });
 			}
-		}	
-    return new Response("OK", { status: 200 });
-  },
+			if (request.method === "POST") {
+				const payload = await request.json();
+				if ('message' in payload) {
+					const chatId = payload.message.chat.id.toString();
+					const name = payload.message.chat.first_name || "";
+					const username = payload.message.chat.username || ""
+					const text = payload.message.text || "";
+					const command = text.split(" ")[0];
+					const args = text.substring(command.length).trim();
+					if (command === "/start") {
+						const { results } = await env.db.prepare("SELECT * FROM users WHERE id = ?")
+							.bind(chatId).all();
+						if (results.length > 0) {
+							await sendMessage(env, chatId, `Welcome back ${name}!`);
+						} else {
+							await env.db.prepare("INSERT INTO users VALUES (?, ?, ?, ?)")
+								.bind(chatId, name, username, "false").run();
+							await sendMessage(env, chatId, `Hi ${name}, welcome to the KetoBot!`);
+						}
+					} else if (command === "/searchtime") await searchDishes(env, chatId, "/searchtime", args);
+					else if (command === "/searchingr") await searchDishes(env, chatId, "/searchingr", args);
+					else if (command === "/searchnfacts") await searchDishes(env, chatId, "/searchnfacts", args);
+					else if (text) await searchDishes(env, chatId, "/searchname", text);
+				}
+			}	
+		return new Response("OK", { status: 200 });
+	},
 };
 
 /**
