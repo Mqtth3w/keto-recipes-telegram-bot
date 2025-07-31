@@ -33,15 +33,7 @@ export default {
 								.bind(results[0].rowid).run();
 						}
 						
-						msg += `${meal}${meal === "breakfast" ? "" :  "(" + ${types[i]} + ")"}:\nDish name: ${results[0].name}\n` +
-							`Cooking time: ${results[0].time}\n` +
-							`Nutrition facts: ${results[0].nutritionFacts}\n` +
-							`Ingredients: ${results[0].ingredients}\n` +
-							`Recipe: ${results[0].recipe}\n` +
-							`Type: ${results[0].type}\n` +
-							`Category: ${results[0].category}\n` +
-							`Already taken: ${results[0].alreadyTaken}\n` +
-							`Meal: ${results[0].meal}\n\n`;
+						msg += `${meal}${meal === "breakfast" ? "" : "(" + types[i] + ")"}:\nDish name: ${results[0].name}\nCooking time: ${results[0].time}\nNutrition facts: ${results[0].nutritionFacts}\nIngredients: ${results[0].ingredients}\nRecipe: ${results[0].recipe}\nType: ${results[0].type}\nCategory: ${results[0].category}\nAlready taken: ${results[0].alreadyTaken}\nMeal: ${results[0].meal}\n\n`;
 						
 					} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
 					
@@ -144,15 +136,7 @@ async function searchDishes(env, chatId, command, data) {
 	for (let i = 0; i < results.length; i++) {
 		const dish = results[i];
 		total++;
-		message += `Dish name: ${dish.name}\n` +
-			`Cooking time: ${dish.time}\n` +
-			`Nutrition facts: ${dish.nutritionFacts}\n` +
-			`Ingredients: ${dish.ingredients}\n` +
-			`Recipe: ${dish.recipe}\n` +
-			`Type: ${dish.type}\n` +
-			`Category: ${dish.category}\n` +
-			`Already taken: ${dish.alreadyTaken}\n` +
-			`Meal: ${dish.meal}\n\n`;
+		message += `Dish name: ${dish.name}\nCooking time: ${dish.time}\nNutrition facts: ${dish.nutritionFacts}\nIngredients: ${dish.ingredients}\nRecipe: ${dish.recipe}\nType: ${dish.type}\nCategory: ${dish.category}\nAlready taken: ${dish.alreadyTaken}\nMeal: ${dish.meal}\n\n`;
 		if ((total % batchSize === 0) || (i === results.length - 1)) {
 			if (i === results.length - 1) {
 				message += `Total dishes matched: ${total}`;
