@@ -9,8 +9,8 @@
 
 export default {
 	async scheduled(controller, env, ctx) {
-		const { results } = await env.db.prepare("SELECT id FROM users").all();
-		if (results.length > 0) {
+		const { users } = await env.db.prepare("SELECT id FROM users").all();
+		if (users.length > 0) {
 			let meals = ["breakfast", "lunch", "dinner"];
 			let types = ["first", "second", "side"];
 			let msg = "";
@@ -40,7 +40,7 @@ export default {
 					if (meal === "breakfast") break;
 				}
 			}
-			await sendBroadcastMessage(env, msg, results.map(user => user.id));
+			await sendBroadcastMessage(env, msg, users.map(user => user.id));
 		}
 	},
 
