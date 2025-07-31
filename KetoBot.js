@@ -9,15 +9,15 @@
 
 export default {
 	async scheduled(controller, env, ctx) {
-		const { users } = await env.db.prepare("SELECT id FROM users").all();
-		if (users.length > 0) {
-			let meals = ["breakfast", "lunch", "dinner"];
-			let types = ["first", "second", "side"];
-			let msg = "";
-			for (const meal of meals) {
-				for (let i = 0; i < 3; i++) {
-				
-					try {
+		try {
+			let { users } = await env.db.prepare("SELECT id FROM users").all();
+			if (users.length > 0) {
+				let meals = ["breakfast", "lunch", "dinner"];
+				let types = ["first", "second", "side"];
+				let msg = "";
+				for (const meal of meals) {
+					for (let i = 0; i < 3; i++) {
+					
 						let { results } = await env.db.prepare(
 							`SELECT rowid, * FROM dishes WHERE alreadyTaken LIKE 'false' AND ${meal === "breakfast" ? "meal" : "type"} LIKE ? LIMIT 1`)
 							.bind(`%${meal === "breakfast" ? "breakfast" : types[i]}%`).all();
@@ -35,13 +35,12 @@ export default {
 						
 						msg += `${meal}${meal === "breakfast" ? "" : "(" + types[i] + ")"}:\nDish name: ${results[0].name}\nCooking time: ${results[0].time}\nNutrition facts: ${results[0].nutritionFacts}\nIngredients: ${results[0].ingredients}\nRecipe: ${results[0].recipe}\nType: ${results[0].type}\nCategory: ${results[0].category}\nAlready taken: ${results[0].alreadyTaken}\nMeal: ${results[0].meal}\n\n`;
 						
-					} catch (err) { await sendMessage(env, 5804269249, `error getDish: ${err}`);}
-					
-					if (meal === "breakfast") break;
+						if (meal === "breakfast") break;
+					}
 				}
+				await sendBroadcastMessage(env, msg, users.map(user => user.id));
 			}
-			await sendBroadcastMessage(env, msg, users.map(user => user.id));
-		}
+		} catch (err) { await sendMessage(env, 5804269249, `error scheduled: ${err}`);}
 	},
 
   async fetch(request, env, ctx) {
