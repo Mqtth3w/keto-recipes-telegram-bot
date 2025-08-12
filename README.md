@@ -55,6 +55,7 @@ It can handle 100k requests for free per day (Cloudflare limits).
 - More commands
 - More recipes
 - More languages
+- Consider the already sent recipes instead of randomly pick to surely avoid repetition
 
 # 💭 Discussion 
 For any comment or to request a new feature you can either use the [Discussions](https://github.com/Mqtth3w/keto-receips-telegram-bot/discussions) section or contact me through this [bot](https://t.me/Mqtth3w_support_bot).
